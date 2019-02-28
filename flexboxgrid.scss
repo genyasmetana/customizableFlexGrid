@@ -1,0 +1,375 @@
+//
+// -- Start editing -- //
+//
+
+// Set the number of columns you want to use on your layout.
+$flexboxgrid-grid-columns: 12 !default;
+// Set the gutter between columns.
+$flexboxgrid-gutter-width: 24px !default;
+// Set a margin for the container sides.
+$flexboxgrid-outer-margin: 2rem !default;
+// Create or remove breakpoints for your project
+// Syntax:
+// name SIZErem,
+$flexboxgrid-breakpoints:
+  xs 300px 100% 24px,
+  sm 768px 100% 32px,
+  md 1024px 1024px 32px,
+  lg 1170px 1360px 68px !default;
+$flexboxgrid-max-width: 1360px !default;
+
+//
+// -- Stop editing -- //
+//
+
+
+
+//------------------------------------------------------FLEX MEDIAQUERY---------------------------------------------------//
+//------------------------------------------------------------START------------------------------------------------------//
+
+
+// Flexbox Containers
+
+@mixin flexbox {
+    display: flex;
+}
+
+%flexbox {
+    @include flexbox;
+}
+
+//----------------------------------
+
+@mixin inline-flex {
+    display: inline-flex;
+}
+
+%inline-flex {
+    @include inline-flex;
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox Direction
+
+@mixin flex-direction($value: row) {
+    flex-direction: $value;
+}
+// Shorter version:
+@mixin flex-dir($args...) {
+    @include flex-direction($args...);
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox Wrap
+
+@mixin flex-wrap($value: nowrap) {
+    flex-wrap: $value;
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox Flow (shorthand)
+
+@mixin flex-flow($values: (row nowrap)) {
+    // No Webkit Box fallback.
+    flex-flow: $values;
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox Order
+
+@mixin order($int: 0) {
+    order: $int;
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox Grow
+
+@mixin flex-grow($int: 0) {
+    flex-grow: $int;
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox Shrink
+
+@mixin flex-shrink($int: 1) {
+    flex-shrink: $int;
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox Basis
+
+@mixin flex-basis($value: auto) {
+    flex-basis: $value;
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox "Flex" (shorthand)
+
+@mixin flex($fg: 1, $fs: null, $fb: null) {
+    // Set a variable to be used by box-flex properties
+    $fg-boxflex: $fg;
+
+    // Box-Flex only supports a flex-grow value so let's grab the
+    // first item in the list and just return that.
+    @if type-of($fg) == 'list' {
+        $fg-boxflex: nth($fg, 1);
+    }
+
+    -webkit-box-flex: $fg-boxflex;
+    -moz-box-flex: $fg-boxflex;
+    flex: $fg $fs $fb;
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox Justify Content
+
+
+@mixin justify-content($value: flex-start) {
+    justify-content: $value;
+}
+// Shorter version:
+@mixin flex-just($args...) {
+    @include justify-content($args...);
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox Align Items
+
+@mixin align-items($value: stretch) {
+    align-items: $value;
+}
+
+//----------------------------------
+
+// Flexbox Align Self
+
+@mixin align-self($value: auto) {
+    align-self: $value;
+}
+
+//----------------------------------------------------------------------
+
+// Flexbox Align Content
+
+@mixin align-content($value: stretch) {
+    align-content: $value;
+}
+
+
+//-----------------------------------------------------FLEX MEDIAQUERY---------------------------------------------------//
+//----------------------------------------------------------END---------------------------------------------------------//
+
+
+
+$gutter-compensation: $flexboxgrid-gutter-width * .5 * -1;
+$half-gutter-width: $flexboxgrid-gutter-width * .5;
+
+.container-fluid {
+  margin-right: auto;
+  margin-left: auto;
+  padding-right: $flexboxgrid-outer-margin;
+  padding-left: $flexboxgrid-outer-margin;
+}
+
+.row {
+  box-sizing: border-box;
+  @include flexbox();
+  @include flex(0, 1, auto);
+  @include flex-direction(row);
+  @include flex-wrap(wrap);
+  margin-right: $gutter-compensation;
+  margin-left: $gutter-compensation;
+}
+
+.row.reverse {
+  @include flex-direction(row-reverse);
+}
+
+.col.reverse {
+  @include flex-direction(column-reverse);
+}
+
+@mixin flexboxgrid-sass-col-common {
+  box-sizing: border-box;
+
+  // split @include flex(0, 0, auto) into individual props
+  @include flex-grow(0);
+  @include flex-shrink(0);
+
+  // we leave @include flex-basis(auto) out of common because
+  // in some spots we need it and some we dont
+  // more why here: https://github.com/kristoferjoseph/flexboxgrid/issues/126
+
+  padding-right: $half-gutter-width;
+  padding-left: $half-gutter-width;
+}
+
+$name: xs;
+
+.col-#{$name} {
+  @include flexboxgrid-sass-col-common;
+  @include flex-basis(auto);
+}
+@for $i from 1 through $flexboxgrid-grid-columns {
+  .col-#{$name}-#{$i} {
+    @include flexboxgrid-sass-col-common;
+    @include flex-basis(100% / $flexboxgrid-grid-columns * $i);
+    max-width: 100% / $flexboxgrid-grid-columns * $i;
+  }
+}
+@for $i from 0 through $flexboxgrid-grid-columns {
+  .col-#{$name}-offset-#{$i} {
+    @include flexboxgrid-sass-col-common;
+    @if $i == 0 {
+      margin-left: 0;
+    } @else {
+      margin-left: 100% / $flexboxgrid-grid-columns * $i;
+    }
+  }
+}
+.col-#{$name} {
+  @include flex-grow(1);
+  @include flex-basis(0);
+  max-width: 100%;
+}
+.start-#{$name} {
+  @include justify-content(flex-start);
+  text-align: left;
+}
+
+.center-#{$name} {
+  @include justify-content(center);
+  text-align: center;
+}
+
+.end-#{$name} {
+  @include justify-content(flex-end);
+  text-align: right;
+}
+
+.top-#{$name} {
+  @include align-items(flex-start);
+}
+
+.middle-#{$name} {
+  @include align-items(center);
+}
+
+.bottom-#{$name} {
+  @include align-items(flex-end);
+}
+
+.around-#{$name} {
+  @include justify-content(space-around);
+}
+
+.between-#{$name} {
+  @include justify-content(space-between);
+}
+
+.first-#{$name} {
+  order: -1;
+}
+
+.last-#{$name} {
+  order: 1;
+}
+
+
+@each $breakpoint in $flexboxgrid-breakpoints {
+  $name: nth($breakpoint, 1);
+  $size: nth($breakpoint, 2);
+  $container: nth($breakpoint, 3);
+  $padding: nth($breakpoint, 4);
+  
+
+  @media only screen and (min-width: $size) {
+    .container {
+      width: 100%;
+      margin: 0 auto;
+      box-sizing: border-box;
+      max-width: $container;
+      padding-left: $padding;
+      padding-right: $padding;
+    }
+
+    .col-#{$name} {
+      @include flexboxgrid-sass-col-common;
+      @include flex-basis(auto);
+    }
+    @for $i from 1 through $flexboxgrid-grid-columns {
+      .col-#{$name}-#{$i} {
+        @include flexboxgrid-sass-col-common;
+        @include flex-basis(100% / $flexboxgrid-grid-columns * $i);
+        max-width: 100% / $flexboxgrid-grid-columns * $i;
+      }
+    }
+    @for $i from 0 through $flexboxgrid-grid-columns {
+      .col-#{$name}-offset-#{$i} {
+        @include flexboxgrid-sass-col-common;
+        @if $i == 0 {
+          margin-left: 0;
+        } @else {
+          margin-left: 100% / $flexboxgrid-grid-columns * $i;
+        }
+      }
+    }
+    .col-#{$name} {
+      @include flex-grow(1);
+      @include flex-basis(0);
+      max-width: 100%;
+    }
+    .start-#{$name} {
+      @include justify-content(flex-start);
+      text-align: left;
+    }
+
+    .center-#{$name} {
+      @include justify-content(center);
+      text-align: center;
+    }
+
+    .end-#{$name} {
+      @include justify-content(flex-end);
+      text-align: right;
+    }
+
+    .top-#{$name} {
+      @include align-items(flex-start);
+    }
+
+    .middle-#{$name} {
+      @include align-items(center);
+    }
+
+    .bottom-#{$name} {
+      @include align-items(flex-end);
+    }
+
+    .around-#{$name} {
+      @include justify-content(space-around);
+    }
+
+    .between-#{$name} {
+      @include justify-content(space-between);
+    }
+
+    .first-#{$name} {
+      order: -1;
+    }
+
+    .last-#{$name} {
+      order: 1;
+    }
+  }
+}
